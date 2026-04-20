@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Buffett's Edge | Small-Cap Value Dashboard (India)</title>
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.25s ease, color 0.2s ease;
+            line-height: 1.45;
+            padding: 1.8rem 2rem;
+        }
+
+        /* DARK MODE (default) */
+        body.dark {
+            --bg-base: #0F1114;
+            --bg-surface: #1C1F26;
+            --bg-card: #22262E;
+            --border-subtle: rgba(255, 220, 100, 0.18);
+            --text-primary: #F0F3F8;
+            --text-secondary: #C0C8D6;
+            --accent-yellow: #FFD966;
+            --accent-gold: #F5B042;
+            --grad-start: #FFE6A3;
+            --grad-end: #FFC857;
+            --badge-bg: rgba(255, 217, 102, 0.12);
+            --shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.4);
+            --icon-color: #FFD966;
+            --stat-color: #FFDE9E;
+        }
+
+        /* LIGHT MODE (pastel green + ocean blue / dark olive) */
+        body.light {
+            --bg-base: #D8F0E5;   /* pastel green background */
+            --bg-surface: #E6F7EF;
+            --bg-card: #FFFFFF;
+            --border-subtle: rgba(31, 94, 110, 0.2);
+            --text-primary: #1E4A3B;   /* dark olive green */
+            --text-secondary: #2C6E5C;
+            --accent-yellow: #1F5E6E;   /* ocean blue for highlights */
+            --accent-gold: #1A7F8F;
+            --grad-start: #1F5E6E;
+            --grad-end: #2C8B6E;
+            --badge-bg: rgba(31, 94, 110, 0.08);
+            --shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.08);
+            --icon-color: #1F5E6E;
+            --stat-color: #155a4b;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+        }
+
+        /* layout container */
+        .dashboard-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* header area */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-subtle);
+        }
+        .title-section h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+        .title-section p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
+        .theme-toggle {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 60px;
+            padding: 0.5rem 1.1rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            color: var(--text-primary);
+            backdrop-filter: blur(2px);
+        }
+        .theme-toggle i {
+            font-size: 1.1rem;
+            color: var(--icon-color);
+        }
+        .theme-toggle:hover {
+            transform: scale(0.97);
+            background: var(--bg-surface);
+        }
+
+        /* stat cards row (key metrics) */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border-radius: 2rem;
+            padding: 1.4rem 1.2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-subtle);
+            transition: all 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+        }
+        .stat-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.6rem;
+        }
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            line-height: 1.2;
+        }
+        .stat-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        /* main dashboard grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 1.8rem;
+            margin-bottom: 2rem;
+        }
+        .card {
+            background: var(--bg-card);
+            border-radius: 1.8rem;
+            padding: 1.5rem 1.6rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-subtle);
+            transition: all 0.2s;
+            height: fit-content;
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1.2rem;
+            border-left: 4px solid var(--accent-yellow);
+            padding-left: 1rem;
+        }
+        .card-header i {
+            font-size: 1.6rem;
+            color: var(--icon-color);
+        }
+        .card-header h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+        }
+        .list-items {
+            list-style: none;
+            margin-top: 0.8rem;
+        }
+        .list-items li {
+            margin-bottom: 0.7rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        .list-items li i {
+            margin-top: 0.2rem;
+            font-size: 0.85rem;
+            color: var(--accent-yellow);
+        }
+        .badge {
+            background: var(--badge-bg);
+            padding: 0.2rem 0.7rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--accent-yellow);
+            display: inline-block;
+        }
+        .tool-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin: 1rem 0 0.6rem;
+        }
+        .tool-pill {
+            background: var(--bg-surface);
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+        }
+        .quote-text {
+            font-style: italic;
+            background: var(--bg-surface);
+            padding: 1rem;
+            border-radius: 1.2rem;
+            margin: 1rem 0;
+            font-size: 0.85rem;
+            border-left: 3px solid var(--accent-yellow);
+        }
+        hr {
+            margin: 1rem 0;
+            border-color: var(--border-subtle);
+        }
+        .footer-note {
+            margin-top: 2rem;
+            background: var(--bg-card);
+            border-radius: 1.5rem;
+            padding: 1.3rem 2rem;
+            text-align: center;
+            font-size: 0.85rem;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+        }
+        .footer-note strong {
+            color: var(--accent-yellow);
+        }
+        @media (max-width: 760px) {
+            body {
+                padding: 1rem;
+            }
+            .card-header h2 {
+                font-size: 1.2rem;
+            }
+            .stat-number {
+                font-size: 1.8rem;
+            }
+        }
+        .gradient-number {
+            background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            font-weight: 800;
+        }
+        .inline-highlight {
+            color: var(--accent-yellow);
+            font-weight: 600;
+        }
+        .small-note {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+        .book-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .book-item {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+        .book-item i {
+            font-size: 0.7rem;
+            color: var(--icon-color);
+        }
+        .btn-mock {
+            background: none;
+            border: none;
+            color: inherit;
+        }
+    </style>
+</head>
+<body class="dark">
+<div class="dashboard-container">
+    <!-- header + theme toggle -->
+    <div class="dashboard-header">
+        <div class="title-section">
+            <h1><i class="fas fa-chalkboard-user" style="margin-right: 8px;"></i>Buffett's Micro-Cap Edge</h1>
+            <p>Indian version · value investing · margin of safety framework · research-driven dashboard</p>
+        </div>
+        <div class="theme-toggle" id="themeToggle">
+            <i class="fas fa-moon" id="themeIcon"></i>
+            <span id="themeLabel">Dark Mode</span>
+        </div>
+    </div>
+
+    <!-- KPI stats row: key numbers from the strategy -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">TARGET CORPUS</div>
+            <div class="stat-number">₹10 Lakhs</div>
+            <div class="stat-desc">starter dry powder · stay in liquid funds until research ready</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">DIVERSIFICATION</div>
+            <div class="stat-number">15–30</div>
+            <div class="stat-desc">stocks · ₹20k–₹50k each · manage illiquidity risk</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">HOLDING PERIOD</div>
+            <div class="stat-number">3–5+ yrs</div>
+            <div class="stat-desc">compounding · no trading mentality</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">ROCE/ROE FILTER</div>
+            <div class="stat-number">>15–20%</div>
+            <div class="stat-desc">high quality · consistent growth</div>
+        </div>
+    </div>
+
+    <!-- Main content 2-col dynamic grid -->
+    <div class="main-grid">
+        <!-- LEFT COLUMN: beginner's roadmap + infrastructure -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-compass"></i>
+                <h2>Where to begin · Zero to value hunter</h2>
+            </div>
+            <div class="list-items">
+                <li><i class="fas fa-graduation-cap"></i> <span><strong class="inline-highlight">2–4 weeks (free)</strong> – Zerodha Varsity: “Intro to Stock Markets” + “Fundamental Analysis” modules. Demat, ratios, intrinsic value.</span></li>
+                <li><i class="fas fa-laptop-house"></i> <span><strong>Infrastructure (1 weekend)</strong> – Open demat with Zerodha/Groww/Upstox. Link Aadhaar, PAN, bank account. <span class="badge">₹10L in savings/liquid fund</span> – do NOT invest before Varsity + screening 100+ companies.</span></li>
+                <li><i class="fas fa-clock"></i> <span><strong>Full-time research mindset</strong> – 2–4 hours daily reading reports, screening small caps. With ₹10L, take small positions (₹20k–50k) across 20–40 ideas.</span></li>
+            </div>
+            <div class="quote-text">
+                <i class="fas fa-quote-left" style="margin-right: 6px;"></i> “Be in love with the subject” – Buffett. Treat research like a job.
+            </div>
+        </div>
+
+        <!-- RIGHT: Buffett method + screening tools -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-chart-line"></i>
+                <h2>Exact approach · Buffett's Indian method</h2>
+            </div>
+            <div><span class="badge">Screening funnel</span> <span style="margin-left: 8px;">thousands → 200–300 → 50–100 deep-dives</span></div>
+            <div class="tool-group">
+                <span class="tool-pill"><i class="fab fa-searchengin"></i> Screener.in</span>
+                <span class="tool-pill"><i class="fas fa-chart-simple"></i> Tickertape</span>
+                <span class="tool-pill"><i class="fas fa-chart-line"></i> Trendlyne</span>
+                <span class="tool-pill"><i class="fas fa-chart-pie"></i> Value Research</span>
+            </div>
+            <div class="list-items">
+                <li><i class="fas fa-filter"></i> <span><strong>Screen micro/small-cap</strong> (mkt cap < ₹1,000 Cr ideal) · ROCE>15%, D/E<0.5, promoter>50%, consistent 3-5 yr growth.</span></li>
+                <li><i class="fas fa-charging-station"></i> <span><strong>Margin of safety + valuation</strong> – low P/E, low P/B relative to growth. Strong balance sheet, hidden gems like obscure railroads Buffett found.</span></li>
+                <li><i class="fas fa-chart-simple"></i> <span><strong>Portfolio rules:</strong> 15–30 stocks (₹20k–50k each), hold 3-5+ years, reinvest dividends, rotate weakest if better idea emerges. Expect volatility 50-100% swings in micro-caps.</span></li>
+            </div>
+        </div>
+
+        <!-- Types of stocks + avoid checklist -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-chart-simple"></i>
+                <h2>Stock universe · micro/small caps</h2>
+            </div>
+            <div><i class="fas fa-check-circle" style="color: var(--icon-color);"></i> <strong>Ideal criteria (Buffett edge)</strong></div>
+            <div class="list-items">
+                <li><i class="fas fa-tag"></i> Mkt cap < ₹2,000–5,000 Cr (ideally under ₹1,000 Cr)</li>
+                <li><i class="fas fa-chart-line"></i> Revenue/earnings CAGR >15% (3–5 years)</li>
+                <li><i class="fas fa-chart-pie"></i> ROCE/ROE >15–20% · low/zero debt</li>
+                <li><i class="fas fa-building"></i> Promoter holding >50% · clean governance</li>
+                <li><i class="fas fa-industry"></i> Niche businesses: specialty chemicals, auto ancillaries, railways, packaging, small manufacturing</li>
+            </div>
+            <hr>
+            <div><i class="fas fa-ban" style="color: #e05a5a;"></i> <strong>Avoid:</strong> Penny stocks, high debt, frequent dilution, related-party red flags, social media hypes.</div>
+            <div class="small-note"><i class="fas fa-train"></i> “Green Bay & Western Railroad” equivalents – small, boring, mispriced Indian gems.</div>
+        </div>
+
+        <!-- Reality check + risk note -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-triangle-exclamation"></i>
+                <h2>Reality check · risk & returns</h2>
+            </div>
+            <div class="list-items">
+                <li><i class="fas fa-chart-line"></i> <span>No guaranteed 50% annual return – Buffett style demands passion & skill. Small/micro caps offer high potential but carry <strong class="inline-highlight">permanent capital loss risk</strong> due to illiquidity, fraud, volatility.</span></li>
+                <li><i class="fas fa-seedling"></i> <span>Start small, continuous learning, never invest money you cannot afford to lose.</span></li>
+                <li><i class="fas fa-brain"></i> <span>“The key is consistency, patience, and genuine curiosity about every small company.”</span></li>
+            </div>
+            <div class="quote-text">
+                ⚡ High risk, high research reward. Big funds ignore these names – your edge is deep work.
+            </div>
+        </div>
+
+        <!-- reading materials + core books (in order) -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-book-open"></i>
+                <h2>Essential reading & learning</h2>
+            </div>
+            <div><strong>Core books (read in order)</strong></div>
+            <div class="book-list" style="margin-top: 0.8rem;">
+                <div class="book-item"><i class="fas fa-book"></i> <span>The Intelligent Investor – Benjamin Graham (bible, margin of safety)</span></div>
+                <div class="book-item"><i class="fas fa-book"></i> <span>Value Investing and Behavioral Finance – Parag Parikh (India-specific)</span></div>
+                <div class="book-item"><i class="fas fa-book"></i> <span>The Dhandho Investor – Mohnish Pabrai (low-risk, high-return)</span></div>
+                <div class="book-item"><i class="fas fa-envelope-open-text"></i> <span>Warren Buffett’s annual letters (free at berkshirehathaway.com)</span></div>
+                <div class="book-item"><i class="fas fa-chart-line"></i> <span>Common Stocks and Uncommon Profits – Philip Fisher</span></div>
+            </div>
+            <hr>
+            <div><i class="fas fa-infinity"></i> <strong>Free ongoing resources:</strong> Zerodha Varsity (Fundamental Analysis), Screener.in, BSE/NSE filings, Tickertape, Moneycontrol.</div>
+            <div class="small-note" style="margin-top: 12px;"><i class="fas fa-check-circle"></i> Start with Zerodha Varsity today, open screener, read annual reports – you now have the exact roadmap.</div>
+        </div>
+
+        <!-- detailed screener + micro-cap workflow -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-microscope"></i>
+                <h2>Scour the small-cap universe</h2>
+            </div>
+            <div><span class="badge">Modern Moody’s manual</span> <span class="badge">digital screeners</span></div>
+            <div class="list-items">
+                <li><i class="fas fa-chart-simple"></i> <span><strong>Screener.in</strong> → custom queries: market cap < ₹1,000 Cr, ROCE>15%, D/E<0.5, promoter holding>50%.</span></li>
+                <li><i class="fas fa-chart-line"></i> <span><strong>Tickertape / Trendlyne</strong> → small-cap filters, DVM scores, analyst consensus.</span></li>
+                <li><i class="fas fa-chart-pie"></i> <span><strong>Value Research / Univest</strong> → quality ratings, institutional ownership.</span></li>
+                <li><i class="fas fa-arrow-right"></i> <span>Goal: Screen thousands → shortlist 200–300 → read full annual reports, quarterly results, management commentary → best 50–100 for deep research.</span></li>
+            </div>
+            <div class="quote-text">
+                🔍 Focus on valuation + margin of safety: buy at significant discount to intrinsic value (low P/E, low P/B relative to growth & ROCE). Strong balance sheets, competent promoters.
+            </div>
+        </div>
+    </div>
+
+    <!-- Bonus: portfolio construction + extra reminder -->
+    <div class="main-grid" style="margin-top: -0.8rem;">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-chart-gantt"></i>
+                <h2>Portfolio blueprint (₹10 Lakhs)</h2>
+            </div>
+            <div class="list-items">
+                <li><i class="fas fa-chart-simple"></i> <span><strong>15–30 stocks</strong> (₹20k–50k each) to mitigate liquidity risk.</span></li>
+                <li><i class="fas fa-hourglass-half"></i> <span>Hold <strong>3–5+ years</strong> – this is investing, not trading.</span></li>
+                <li><i class="fas fa-redo-alt"></i> <span>Reinvest dividends & use opportunity cost: sell weakest when better idea emerges.</span></li>
+                <li><i class="fas fa-waveform"></i> <span>Expect micro-cap volatility (50–100% swings) – the method aims for high compounded returns over time.</span></li>
+            </div>
+            <div class="small-note"><i class="fas fa-rupee-sign"></i> 80% of capital stays in liquid funds until premium opportunities appear.</div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-gem"></i>
+                <h2>Buffett's Indian micro-cap ethos</h2>
+            </div>
+            <div>“These are the Indian equivalents of the Green Bay & Western Railroad Buffett loved – small, boring, but mispriced.”</div>
+            <div class="tool-group" style="margin-top: 1rem;">
+                <span class="tool-pill"><i class="fas fa-chart-line"></i> Consistent growth >15%</span>
+                <span class="tool-pill"><i class="fas fa-shield-alt"></i> Low debt · High ROCE</span>
+                <span class="tool-pill"><i class="fas fa-users"></i> Promoter skin in game</span>
+            </div>
+            <div class="quote-text" style="margin-top: 1rem;">
+                ⚡ Avoid social media hype, focus on annual reports and management quality. Build a circle of competence.
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER with exact playbook message -->
+    <div class="footer-note">
+        <i class="fas fa-flag-checkered" style="margin-right: 6px;"></i> 
+        <strong>Follow this exact playbook</strong> and you will be applying Buffett’s small-capital method precisely to the Indian market. 
+        The key is consistency, patience, and genuine curiosity about every small company. 
+        <strong>Start with Zerodha Varsity today, open your screener, and begin reading reports — you now have the roadmap.</strong>
+        <div style="margin-top: 8px; font-size: 0.7rem;">© Value investing framework | High risk, high research reward | never invest more than you can lose</div>
+    </div>
+</div>
+
+<script>
+    // Theme switcher: dark (default) & light (pastel green background)
+    const toggleBtn = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const themeLabel = document.getElementById('themeLabel');
+    const body = document.body;
+
+    function setTheme(theme) {
+        if (theme === 'light') {
+            body.classList.remove('dark');
+            body.classList.add('light');
+            themeIcon.className = 'fas fa-sun';
+            themeLabel.innerText = 'Light Mode';
+            localStorage.setItem('dashboardTheme', 'light');
+        } else {
+            body.classList.remove('light');
+            body.classList.add('dark');
+            themeIcon.className = 'fas fa-moon';
+            themeLabel.innerText = 'Dark Mode';
+            localStorage.setItem('dashboardTheme', 'dark');
+        }
+    }
+
+    // load saved preference
+    const savedTheme = localStorage.getItem('dashboardTheme');
+    if (savedTheme === 'light') {
+        setTheme('light');
+    } else {
+        setTheme('dark');
+    }
+
+    toggleBtn.addEventListener('click', () => {
+        if (body.classList.contains('dark')) {
+            setTheme('light');
+        } else {
+            setTheme('dark');
+        }
+    });
+</script>
+</body>
+</html>
