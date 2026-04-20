@@ -19,6 +19,8 @@
             transition: background-color 0.25s ease, color 0.2s ease;
             line-height: 1.45;
             padding: 1.8rem 2rem;
+            position: relative;
+            min-height: 100vh;
         }
 
         /* DARK MODE (default) */
@@ -39,19 +41,19 @@
             --stat-color: #FFDE9E;
         }
 
-        /* LIGHT MODE (pastel green + ocean blue / dark olive) */
+        /* LIGHT MODE - Pastel Olive + Ocean Blue + bubble animations */
         body.light {
-            --bg-base: #D8F0E5;   /* pastel green background */
-            --bg-surface: #E6F7EF;
+            --bg-base: #C8D5B5;   /* pastel olive background */
+            --bg-surface: #DCE8C8;
             --bg-card: #FFFFFF;
-            --border-subtle: rgba(31, 94, 110, 0.2);
+            --border-subtle: rgba(31, 94, 110, 0.28);
             --text-primary: #1E4A3B;   /* dark olive green */
             --text-secondary: #2C6E5C;
-            --accent-yellow: #1F5E6E;   /* ocean blue for highlights */
+            --accent-yellow: #1F5E6E;   /* ocean blue */
             --accent-gold: #1A7F8F;
             --grad-start: #1F5E6E;
             --grad-end: #2C8B6E;
-            --badge-bg: rgba(31, 94, 110, 0.08);
+            --badge-bg: rgba(31, 94, 110, 0.1);
             --shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.08);
             --icon-color: #1F5E6E;
             --stat-color: #155a4b;
@@ -62,11 +64,54 @@
             color: var(--text-primary);
         }
 
-        /* layout container */
+        /* Bubble animation container - only visible in light mode */
+        .bubble-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .bubble {
+            position: absolute;
+            background: rgba(31, 94, 110, 0.12);
+            border-radius: 50%;
+            animation: floatBubble linear infinite;
+            pointer-events: none;
+        }
+        @keyframes floatBubble {
+            0% {
+                transform: translateY(100vh) scale(0.8);
+                opacity: 0;
+            }
+            20% {
+                opacity: 0.5;
+            }
+            80% {
+                opacity: 0.4;
+            }
+            100% {
+                transform: translateY(-20vh) scale(1.2);
+                opacity: 0;
+            }
+        }
+        /* Hide bubbles in dark mode */
+        body.dark .bubble-container {
+            display: none;
+        }
+        body.light .bubble-container {
+            display: block;
+        }
+
         .dashboard-container {
             max-width: 1600px;
             margin: 0 auto;
             width: 100%;
+            position: relative;
+            z-index: 2;
         }
 
         /* header area */
@@ -117,7 +162,7 @@
             background: var(--bg-surface);
         }
 
-        /* stat cards row (key metrics) */
+        /* stats grid - now includes CAGR card */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -299,14 +344,14 @@
             font-size: 0.7rem;
             color: var(--icon-color);
         }
-        .btn-mock {
-            background: none;
-            border: none;
-            color: inherit;
-        }
     </style>
 </head>
 <body class="dark">
+<!-- Bubble animation container for light mode -->
+<div class="bubble-container" id="bubbleContainer">
+    <!-- bubbles will be injected via JS -->
+</div>
+
 <div class="dashboard-container">
     <!-- header + theme toggle -->
     <div class="dashboard-header">
@@ -320,10 +365,10 @@
         </div>
     </div>
 
-    <!-- KPI stats row: key numbers from the strategy -->
+    <!-- KPI stats row: includes new CAGR card + updated Starting Capital -->
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-label">TARGET CORPUS</div>
+            <div class="stat-label">Starting Capital</div>
             <div class="stat-number">₹10 Lakhs</div>
             <div class="stat-desc">starter dry powder · stay in liquid funds until research ready</div>
         </div>
@@ -342,11 +387,17 @@
             <div class="stat-number">>15–20%</div>
             <div class="stat-desc">high quality · consistent growth</div>
         </div>
+        <!-- NEW: Realistic Expected CAGR card -->
+        <div class="stat-card">
+            <div class="stat-label">REALISTIC EXPECTED CAGR</div>
+            <div class="stat-number">12–18%</div>
+            <div class="stat-desc">3–5 year horizon · micro-cap value premium · high skill required, not guaranteed</div>
+        </div>
     </div>
 
     <!-- Main content 2-col dynamic grid -->
     <div class="main-grid">
-        <!-- LEFT COLUMN: beginner's roadmap + infrastructure -->
+        <!-- LEFT COLUMN: beginner's roadmap + infrastructure (updated text) -->
         <div class="card">
             <div class="card-header">
                 <i class="fas fa-compass"></i>
@@ -354,7 +405,7 @@
             </div>
             <div class="list-items">
                 <li><i class="fas fa-graduation-cap"></i> <span><strong class="inline-highlight">2–4 weeks (free)</strong> – Zerodha Varsity: “Intro to Stock Markets” + “Fundamental Analysis” modules. Demat, ratios, intrinsic value.</span></li>
-                <li><i class="fas fa-laptop-house"></i> <span><strong>Infrastructure (1 weekend)</strong> – Open demat with Zerodha/Groww/Upstox. Link Aadhaar, PAN, bank account. <span class="badge">₹10L in savings/liquid fund</span> – do NOT invest before Varsity + screening 100+ companies.</span></li>
+                <li><i class="fas fa-laptop-house"></i> <span><strong>Infrastructure (1 weekend)</strong> – Open demat with any discount broker of your choice. Link Aadhaar, PAN, bank account. <span class="badge">₹10L in savings/liquid fund</span> – do NOT invest before Varsity + screening 100+ companies.</span></li>
                 <li><i class="fas fa-clock"></i> <span><strong>Full-time research mindset</strong> – 2–4 hours daily reading reports, screening small caps. With ₹10L, take small positions (₹20k–50k) across 20–40 ideas.</span></li>
             </div>
             <div class="quote-text">
@@ -417,7 +468,7 @@
             </div>
         </div>
 
-        <!-- reading materials + core books (in order) -->
+        <!-- reading materials + core books (updated: removed "bible") -->
         <div class="card">
             <div class="card-header">
                 <i class="fas fa-book-open"></i>
@@ -425,7 +476,7 @@
             </div>
             <div><strong>Core books (read in order)</strong></div>
             <div class="book-list" style="margin-top: 0.8rem;">
-                <div class="book-item"><i class="fas fa-book"></i> <span>The Intelligent Investor – Benjamin Graham (bible, margin of safety)</span></div>
+                <div class="book-item"><i class="fas fa-book"></i> <span>The Intelligent Investor – Benjamin Graham (margin of safety)</span></div>
                 <div class="book-item"><i class="fas fa-book"></i> <span>Value Investing and Behavioral Finance – Parag Parikh (India-specific)</span></div>
                 <div class="book-item"><i class="fas fa-book"></i> <span>The Dhandho Investor – Mohnish Pabrai (low-risk, high-return)</span></div>
                 <div class="book-item"><i class="fas fa-envelope-open-text"></i> <span>Warren Buffett’s annual letters (free at berkshirehathaway.com)</span></div>
@@ -499,7 +550,7 @@
 </div>
 
 <script>
-    // Theme switcher: dark (default) & light (pastel green background)
+    // Theme switcher: dark / light (pastel olive + ocean blue)
     const toggleBtn = document.getElementById('themeToggle');
     const themeIcon = document.getElementById('themeIcon');
     const themeLabel = document.getElementById('themeLabel');
@@ -512,12 +563,38 @@
             themeIcon.className = 'fas fa-sun';
             themeLabel.innerText = 'Light Mode';
             localStorage.setItem('dashboardTheme', 'light');
+            createBubbles(); // ensure bubbles appear in light mode
         } else {
             body.classList.remove('light');
             body.classList.add('dark');
             themeIcon.className = 'fas fa-moon';
             themeLabel.innerText = 'Dark Mode';
             localStorage.setItem('dashboardTheme', 'dark');
+            // remove bubbles if any (they are hidden via CSS, but clear container to save memory)
+            const container = document.getElementById('bubbleContainer');
+            if (container) container.innerHTML = '';
+        }
+    }
+
+    // generate floating bubbles for light mode (pastel olive background)
+    function createBubbles() {
+        const container = document.getElementById('bubbleContainer');
+        if (!container) return;
+        // only generate if light mode active
+        if (!body.classList.contains('light')) return;
+        container.innerHTML = '';
+        const bubbleCount = 35;
+        for (let i = 0; i < bubbleCount; i++) {
+            const bubble = document.createElement('div');
+            bubble.classList.add('bubble');
+            const size = Math.random() * 60 + 20; // 20px to 80px
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${Math.random() * 100}%`;
+            bubble.style.animationDuration = `${Math.random() * 12 + 8}s`; // 8-20s
+            bubble.style.animationDelay = `${Math.random() * 15}s`;
+            bubble.style.opacity = Math.random() * 0.4 + 0.1;
+            container.appendChild(bubble);
         }
     }
 
@@ -534,6 +611,13 @@
             setTheme('light');
         } else {
             setTheme('dark');
+        }
+    });
+
+    // reinitialize bubbles when window resizes or theme changes (though setTheme already calls createBubbles)
+    window.addEventListener('resize', () => {
+        if (body.classList.contains('light')) {
+            createBubbles();
         }
     });
 </script>
